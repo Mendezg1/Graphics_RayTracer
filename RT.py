@@ -6,12 +6,18 @@ from lights import *
 from rtlib import RayTracer
 from materials import *
 
-brick = Material(diffuse=(1,0.3,0.2), spec=8, ks=0.01)
-grass = Material(diffuse=(0.2,0.8,0.2), spec=32, ks=0.1)
+brick = Material(diffuse=(1,0.3,0.2), spec=8, ks=0.01, matType=OPAQUE)
+grass = Material(diffuse=(0.2,0.8,0.2), spec=32, ks=0.1, matType=OPAQUE )
 water = Material(diffuse=(0.2,0.2,0.8), spec=256, ks=0.5)
 snow = Material(diffuse=(0.8,0.8,0.8), spec=64, ks=0.35)
 coal = Material(diffuse=(0.2,0.2,0.2), spec=64, ks=0.35)
 stone = Material(diffuse=(0.45,0.45,0.45), spec=6, ks=0.05)
+diamond = Material(diffuse=(0.6, 0.6, 0.9), spec=128, ks=0.20, ior=2.417, matType=TRANSPARENT)
+mirror = Material(diffuse=(0.9, 0.9, 0.9), spec=64, ks=0.2, matType=REFLECTIVE)
+window = Material(diffuse=(0.4, 0.4, 0.4), spec=64, ks=0.2, matType=REFLECTIVE)
+glass = Material(diffuse=(0.9, 0.9, 0.9), spec=64, ks=0.15, ior=1.5, matType=TRANSPARENT)
+ruby = Material(diffuse=(0.9,0.2,0.2), spec=128, ks=0.2, ior=2.417, matType=TRANSPARENT)
+
 
 width = 400
 height = 400
@@ -23,70 +29,44 @@ screen.set_alpha(None)
 
 rayTracer = RayTracer(screen)
 
-#Cabeza
-rayTracer.scene.append(
-    Sphere(pos=(0, 1.6, -4.5), rad=0.75, material=snow)
-)
-rayTracer.scene.append(
-    Sphere(pos=(-0.3, 1.7, -3.815), rad=0.1, material=coal)
-)
-
-#Por la iluminación el color del ladrillo hecho en clase tuvo los tonos anaranjados que se buscaban.
-rayTracer.scene.append(
-    Sphere(pos=(0, 1.5, -3.835), rad=0.13, material=brick)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0.3, 1.7, -3.815), rad=0.1, material=coal)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0, 1.24, -3.92), rad=0.1, material=stone)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0.2, 1.3, -3.93), rad=0.1, material=stone)
-)
-rayTracer.scene.append(
-    Sphere(pos=(-0.2, 1.3, -3.93), rad=0.1, material=stone)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0.3, 1.45, -3.92), rad=0.1, material=stone)
-)
-rayTracer.scene.append(
-    Sphere(pos=(-0.3, 1.45, -3.92), rad=0.1, material=stone)
-)
+rayTracer.envMap = pygame.image.load("Textures/cielo.bmp")
 
 
-#Cuerpo de arriba
 rayTracer.scene.append(
-    Sphere(pos=(0, 0.4, -4.7), rad=1, material=snow)
+    Sphere(pos=(-1, -0.5, -3), rad=0.5, material=ruby)
 )
-
 rayTracer.scene.append(
-    Sphere(pos=(0,0.45,-3.8), rad=0.2, material=coal)
+    Sphere(pos=(-1, 1, -3), rad=0.5, material=diamond)
 )
-
 rayTracer.scene.append(
-    Sphere(pos=(0,-0.25,-3.8), rad=0.2, material=coal)
+    Sphere(pos=(0, 1, -3), rad=0.5, material=mirror)
 )
-
-#Cuerpo de abajo
 rayTracer.scene.append(
-    Sphere(pos=(0, -1, -5), rad=1.25, material=snow)
+    Sphere(pos=(0, -0.5, -3), rad=0.5, material=window)
 )
-
 rayTracer.scene.append(
-    Sphere(pos=(0,-1,-3.8), rad=0.25, material=coal)
+    Sphere(pos=(1, 1, -3), rad=0.5, material=grass)
 )
-
-
-
+rayTracer.scene.append(
+    Sphere(pos=(1, -0.5, -3), rad=0.5, material=brick)
+)
 
 
 rayTracer.lights.append(
-    DirectionalLight(direction=(0, 0, -1), intensity=1)
+    AmbientLight(intensity=0.5)
+)
+rayTracer.lights.append(
+    DirectionalLight(direction=(-1, -1, -1), intensity=0.3)
+)
+rayTracer.lights.append(
+    PointLight(point=(2.5, 0, -5), intensity=1)
 )
 
 
 isRunning = True
+
+rayTracer.rtClear()
+rayTracer.rtRender()
 
 while isRunning:
     for event in pygame.event.get():
@@ -95,9 +75,10 @@ while isRunning:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 isRunning = False
-
-    rayTracer.rtClear()
-    rayTracer.rtRender()
     pygame.display.flip()
+
+rect = pygame.Rect(0, 0, width, height)
+sub = screen.subsurface(rect)
+pygame.image.save(sub, "output.png")
 
 pygame.quit()

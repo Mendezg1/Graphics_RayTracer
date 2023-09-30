@@ -1,5 +1,5 @@
 from mate import *
-
+from math import pi, acos, atan2
 class Shape(object):
     def __init__(self, pos, material):
         self.position = pos
@@ -9,10 +9,11 @@ class Shape(object):
         return None
 
 class Intercept(object):
-    def __init__(self, distance, impact, normal, obj):
+    def __init__(self, distance, impact, normal, obj, texcoords):
         self.distance = distance
         self.impact = impact
         self.normal = normal
+        self.texcoords = texcoords
         self.obj = obj
 
 
@@ -25,6 +26,8 @@ class Sphere(Shape):
     def ray_intersect(self, origin, direction):
         L = [self.position[i] - origin[i] for i in range(3)]
         magnL = magnitud(L)
+        if not direction or not L:
+            print(str(L) + " " + str(direction))
         tca = producto_punto(L, direction)
         d = (abs(pow(magnL,2) - pow(tca,2))) ** 0.5
         if d>self.radius:
@@ -43,8 +46,12 @@ class Sphere(Shape):
         P = [origin[i] + (direction[i] * t0) for i in range(3)]
         normal = restar_vectores(P, self.position)
         normal = normalizar(normal)
+
+        u = (atan2(normal[2], normal[0]) / (2 * pi)) + 0.5
+        v = acos(normal[1]) / pi
             
         return Intercept(distance=t0,
                         impact=P,
                         normal=normal,
+                        texcoords=(u, v),
                         obj=self)
