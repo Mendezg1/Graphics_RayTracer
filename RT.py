@@ -1,17 +1,17 @@
 import pygame
 from pygame.locals import *
 
-from figuras import Sphere
+from figuras import *
 from lights import *
 from rtlib import RayTracer
 from materials import *
 
 brick = Material(diffuse=(1,0.3,0.2), spec=8, ks=0.01, matType=OPAQUE)
 grass = Material(diffuse=(0.2,0.8,0.2), spec=32, ks=0.1, matType=OPAQUE )
-water = Material(diffuse=(0.2,0.2,0.8), spec=256, ks=0.5)
-snow = Material(diffuse=(0.8,0.8,0.8), spec=64, ks=0.35)
-coal = Material(diffuse=(0.2,0.2,0.2), spec=64, ks=0.35)
-stone = Material(diffuse=(0.45,0.45,0.45), spec=6, ks=0.05)
+water = Material(diffuse=(0.2,0.2,0.8), spec=256, ks=0.5, matType=OPAQUE)
+snow = Material(diffuse=(0.8,0.8,0.8), spec=64, ks=0.35, matType=OPAQUE)
+coal = Material(diffuse=(0.2,0.2,0.2), spec=64, ks=0.35, matType=OPAQUE)
+stone = Material(diffuse=(0.45,0.45,0.45), spec=6, ks=0.05, matType=OPAQUE)
 diamond = Material(diffuse=(0.6, 0.6, 0.9), spec=128, ks=0.20, ior=2.417, matType=TRANSPARENT)
 mirror = Material(diffuse=(0.9, 0.9, 0.9), spec=64, ks=0.2, matType=REFLECTIVE)
 window = Material(diffuse=(0.4, 0.4, 0.4), spec=64, ks=0.2, matType=REFLECTIVE)
@@ -31,35 +31,26 @@ rayTracer = RayTracer(screen)
 
 rayTracer.envMap = pygame.image.load("Textures/cielo.bmp")
 
-
-rayTracer.scene.append(
-    Sphere(pos=(-1, -0.5, -3), rad=0.5, material=ruby)
-)
-rayTracer.scene.append(
-    Sphere(pos=(-1, 1, -3), rad=0.5, material=diamond)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0, 1, -3), rad=0.5, material=mirror)
-)
-rayTracer.scene.append(
-    Sphere(pos=(0, -0.5, -3), rad=0.5, material=window)
-)
-rayTracer.scene.append(
-    Sphere(pos=(1, 1, -3), rad=0.5, material=grass)
-)
-rayTracer.scene.append(
-    Sphere(pos=(1, -0.5, -3), rad=0.5, material=brick)
-)
+rayTracer.scene.append(Plane((0,0,-8),(0,0,-1),snow))
+rayTracer.scene.append(Disk((0,0,-7.85),(0,0,-1),mirror,2.1))
+rayTracer.scene.append(Plane((0,-2.5,0),(0,1,0),grass))
+rayTracer.scene.append(Plane((0,2.5,0),(0,-1,0),stone))
+rayTracer.scene.append(Plane((2.2,0,0),(-1,0,0),brick))
+rayTracer.scene.append(Plane((-2.2,0,0),(1,0,0),water))
 
 
+
+rayTracer.scene.append(AABB((-0.5,-1,-2),(0.65,0.65,0.65),diamond))
+rayTracer.scene.append(AABB((0.5,-1,-2),(0.65,0.65,0.65),ruby))
+
 rayTracer.lights.append(
-    AmbientLight(intensity=0.5)
+    AmbientLight(intensity=0.6)
 )
 rayTracer.lights.append(
-    DirectionalLight(direction=(-1, -1, -1), intensity=0.3)
+    PointLight(point=(2.2, 2.5, -5), intensity=1)
 )
 rayTracer.lights.append(
-    PointLight(point=(2.5, 0, -5), intensity=1)
+    PointLight(point=(-2.2, 2.5, -5), intensity=1)
 )
 
 

@@ -3,7 +3,7 @@ from mate import *
 from lights import reflect, refract, totalInternalReflection as tir, fresnel
 from materials import *
 
-MAX_RECURSION_DEPTH = 3
+MAX_RECURSION_DEPTH = 4
 
 class RayTracer(object):
     def __init__(self, screen):

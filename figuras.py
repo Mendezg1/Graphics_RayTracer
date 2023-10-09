@@ -51,87 +51,94 @@ class Disk(Plane):
         planeIntersect = super().ray_intersect(origin, direction)
 
         if not planeIntersect:
-            contactD = restar_vectores(planeIntersect.impact, self.position)
-            contactD = magnitud(contactD)
+            return None
+        
+        contactD = restar_vectores(planeIntersect.impact, self.position)
+        contactD = magnitud(contactD)
 
-            if contactD > self.radius:
-                return None
-            return Intercept(distance=contactD,
-                        impact=planeIntersect.impact,
-                        normal=self.normal,
-                        texcoords=None,
-                        obj=self)
+        if contactD > self.radius:
+            return None
+        return Intercept(distance=contactD,
+                    impact=planeIntersect.impact,
+                    normal=planeIntersect.normal,
+                    texcoords=None,
+                    obj=self)
 
 class AABB(Shape):
-    def __init__(self, pos, size, material):
+    def __init__(self, position, size, material):
         self.size = size
-        super().__init__(pos, material)
-
-        self.size = size
+        super().__init__(position, material)
 
         self.planes = []
 
-        leftPlane = Plane(restar_vectores(self.position, (size[0] / 2,0,0)), (-1,0,0), material)
-        rightPlane = Plane(restar_vectores(self.position, (-size[0] / 2,0,0)), (1,0,0), material)
+        self.size = size
 
-        bottomPlane = Plane(restar_vectores(self.position, (0,size[1] / 2,0)), (0,-1,0), material)
-        topPlane =  Plane(restar_vectores(self.position, (0,-size[1] / 2,0)), (0,1,0), material)
+        leftPlane = Plane(sumar_vectores(position, (-size[0] / 2, 0, 0)), (-1, 0, 0), material)
+        rightPlane = Plane(sumar_vectores(position, (size[0] / 2, 0, 0)), (1, 0, 0), material)
 
-        frontPlane = Plane(restar_vectores(self.position, (0,0,-size[2] / 2)), (0,0,1), material)
-        backPlane = Plane(restar_vectores(self.position, (0,0,size[2] / 2)), (0,0,-1), material)
+        topPlane = Plane(sumar_vectores(position, (0, size[1] / 2, 0)), (0, 1, 0), material)
+        bottomPlane = Plane(sumar_vectores(position, (0, -size[1] / 2, 0)), (0, -1, 0), material)
+
+        frontPlane = Plane(sumar_vectores(position, (0, 0, size[2]/ 2)), (0, 0, 1), material)
+        backPlane = Plane(sumar_vectores(position, (0, 0, -size[2]/ 2)), (0, 0, -1), material)
 
         self.planes.append(leftPlane)
         self.planes.append(rightPlane)
-        self.planes.append(bottomPlane)
         self.planes.append(topPlane)
+        self.planes.append(bottomPlane)
         self.planes.append(frontPlane)
         self.planes.append(backPlane)
 
-        self.boundsMin = [0,0,0]
-        self.boundsMax = [0,0,0]
+        self.boundsMin =[0,0,0]
+        self.boundsMax =[0,0,0]
 
-        bias = 0.001
+        bias = 0.0001
 
         for i in range(3):
-            self.boundsMin[i] = self.position[i] - (bias + size[i]/2)
-            self.boundsMax[i] = self.position[i] + (bias + size[i]/2)
-    
+            self.boundsMin[i] = self.position[i] - (self.size[i] / 2 + bias)
+            self.boundsMax[i] = self.position[i] + self.size[i] / 2 + bias
+
     def ray_intersect(self, origin, direction):
         intersect = None
-        t = float('inf')
+        t = float("inf")
 
-        u, v = 0, 0
+        u=0
+        v=0
 
         for plane in self.planes:
-            planeIntersect = plane.ray_intersect(origin,direction)
-            if planeIntersect:
+
+            planeIntersect = plane.ray_intersect(origin, direction)
+
+            if planeIntersect is not None:
+
                 planePoint = planeIntersect.impact
-                
-                if self.boundsMin[0] <= planePoint[0] <= self.boundsMax[0]:
-                    if self.boundsMin[0] <= planePoint[0] <= self.boundsMax[1]:
-                        if self.boundsMin[0] <= planePoint[0] <= self.boundsMax[2]:
+
+                if self.boundsMin[0] < planePoint[0] < self.boundsMax[0]:
+                    if self.boundsMin[1] < planePoint[1] < self.boundsMax[1]:
+                        if self.boundsMin[2] < planePoint[2] < self.boundsMax[2]:
                             if planeIntersect.distance < t:
                                 t = planeIntersect.distance
                                 intersect = planeIntersect
 
-                                if abs(plane.normal[0] > 0):
-                                    u = (planePoint[1] - self.boundsMin[1]) / self.size[1]
-                                    v = (planePoint[2] - self.boundsMin[2]) / self.size[2]
-                                elif abs(plane.normal[1]) > 0:
-                                    u = (planePoint[0] - self.boundsMin[0]) / self.size[0]
-                                    v = (planePoint[2] - self.boundsMin[2]) / self.size[2]
-                                elif abs(plane.normal[2]) > 0:
-                                    u = (planePoint[0] - self.boundsMin[0]) / self.size[0]
-                                    v = (planePoint[1] - self.boundsMin[1]) / self.size[1]
+                                if abs(plane.normal[0])>0:
+                                    u= (planePoint[1]-self.boundsMin[1]) / (self.size[1] + 0.002)
+                                    v= (planePoint[2]-self.boundsMin[2]) / (self.size[2] + 0.002)
+                                elif abs(plane.normal[1])>0:
+                                    u= (planePoint[0]-self.boundsMin[0]) / (self.size[0] + 0.002)
+                                    v= (planePoint[2]-self.boundsMin[2]) / (self.size[2] + 0.002)
+                                elif abs(plane.normal[2])>0:
+                                    u= (planePoint[0]-self.boundsMin[0]) / (self.size[0] + 0.002)
+                                    v= (planePoint[1]-self.boundsMin[1]) / (self.size[1] + 0.002)
 
-        if not intersect:
+
+        if intersect is None:
             return None
-        else:
-            return Intercept(distance=t,
-                        impact=intersect.impact,
-                        normal=intersect.normal,
-                        texcoords=(u, v),
-                        obj=self)
+
+        return Intercept(distance=t,
+                            impact=intersect.impact,
+                            normal=intersect.normal,
+                            texcoords=(u,v),
+                            obj=self)
 
              
 
