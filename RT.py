@@ -39,7 +39,7 @@ rayTracer.scene.append(Plane((2.2,0,0),(-1,0,0),brick))
 rayTracer.scene.append(Plane((-2.2,0,0),(1,0,0),water))
 
 
-rayTracer.scene.append(Donut((-0.3,-0.7,-1.5),diamond,0.2,0.075))
+rayTracer.scene.append(Donut((-0.3,-0.7,-1.5),ruby,0.2,0.075))
 rayTracer.scene.append(Donut((0.4,-0.7,-3.2),coal,0.4,0.25))
 
 rayTracer.lights.append(
