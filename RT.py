@@ -32,16 +32,15 @@ rayTracer = RayTracer(screen)
 rayTracer.envMap = pygame.image.load("Textures/cielo.bmp")
 
 rayTracer.scene.append(Plane((0,0,-8),(0,0,-1),snow))
-rayTracer.scene.append(Disk((0,0,-7.85),(0,0,-1),mirror,2.1))
+rayTracer.scene.append(Donut((0,0,-5),mirror,1,0.5))
 rayTracer.scene.append(Plane((0,-2.5,0),(0,1,0),grass))
 rayTracer.scene.append(Plane((0,2.5,0),(0,-1,0),stone))
 rayTracer.scene.append(Plane((2.2,0,0),(-1,0,0),brick))
 rayTracer.scene.append(Plane((-2.2,0,0),(1,0,0),water))
 
 
-
-rayTracer.scene.append(AABB((-0.5,-1,-2),(0.65,0.65,0.65),diamond))
-rayTracer.scene.append(AABB((0.5,-1,-2),(0.65,0.65,0.65),ruby))
+rayTracer.scene.append(Donut((-0.3,-0.7,-1.5),diamond,0.2,0.075))
+rayTracer.scene.append(Donut((0.4,-0.7,-3.2),coal,0.4,0.25))
 
 rayTracer.lights.append(
     AmbientLight(intensity=0.6)

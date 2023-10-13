@@ -140,6 +140,48 @@ class AABB(Shape):
                             texcoords=(u,v),
                             obj=self)
 
+
+"""
+    Pregunta a ChatGPT: Tengo la clase Disk y Plane. Plane dibuja un plano infinito utilizando lógica de RayTracer y Pygame.
+    Disk genera un disco delimitado por un radio que utiliza la clase Plane. Con ellas, ¿cómo puedo generar una clase 
+    que genere una figura similar a una dona?
+"""
+class Donut:
+    def __init__(self, position, material, major_radius, minor_radius):
+        self.position = position
+        self.material = material
+        self.major_radius = major_radius
+        self.minor_radius = minor_radius
+
+    def ray_intersect(self, origin, direction):
+        # Calcula la intersección con el plano central de la dona
+        central_plane = Plane(self.position, [0, 0, 1], self.material)
+        central_intercept = central_plane.ray_intersect(origin, direction)
+
+        if central_intercept is None:
+            return None
+
+        # Calcula la distancia al centro del toro
+        center_to_impact = restar_vectores(central_intercept.impact, self.position)
+        distance_to_center = magnitud(center_to_impact)
+
+        point = central_intercept.impact
+
+        # Comprueba si el punto de intersección está dentro del toro
+        if (distance_to_center >= self.minor_radius and
+                distance_to_center <= self.major_radius + self.minor_radius):
+            u = (1 + math.atan2(point[1], point[0]) / (2 * math.pi)) % 1
+            v = (magnitud(center_to_impact) - self.minor_radius) / (self.major_radius - self.minor_radius)
+
+            return Intercept(distance=distance_to_center,
+                            impact=central_intercept.impact,
+                            normal=central_intercept.normal,
+                            texcoords=(u,v),
+                            obj=self)
+
+
+        else:
+            return None
              
 
 
