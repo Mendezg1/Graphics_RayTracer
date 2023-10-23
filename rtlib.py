@@ -87,8 +87,8 @@ class RayTracer(object):
                 return [envColor[i]/255 for i in range(3)]
             
             else:
-                color = self.clearColor
-                return [envColor[i]/255 for i in range(3)]
+                color = self.ClearColor
+                return [i/255 for i in self.ClearColor]
 
         material = intercept.obj.material
         surfaceColor = material.diffuse

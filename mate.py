@@ -168,6 +168,29 @@ def magnitud(vector):
     suma_cuadrados = sum(componente ** 2 for componente in vector)
     magnitud = math.sqrt(suma_cuadrados)
     return magnitud
+
+"""
+    Conversación con GPT: ¿Cómo puedo, en python, rotar un vector de componentes x,y,z?
+"""
+def rotacion_vector(vec, rotacion):
+    x, y, z = vec
+    radx = math.radians(rotacion[0])
+    rady = math.radians(rotacion[1])
+    radz = math.radians(rotacion[2])
+    sinx, cosx = math.sin(radx), math.cos(radx)
+    siny, cosy = math.sin(rady), math.cos(rady)
+    sinz, cosz = math.sin(radz), math.cos(radz)
+
+    # Apply rotacion around x-axis
+    y, z = y * cosx - z * sinx, y * sinx + z * cosx
+
+    # Apply rotacion around y-axis
+    x, z = x * cosy + z * siny, x * -siny + z * cosy
+
+    # Apply rotacion around z-axis
+    x, y = x * cosz - y * sinz, x * sinz + y * cosz
+
+    return (x, y, z)
     
 
 

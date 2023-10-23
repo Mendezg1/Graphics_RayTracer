@@ -146,16 +146,16 @@ class AABB(Shape):
     Disk genera un disco delimitado por un radio que utiliza la clase Plane. Con ellas, ¿cómo puedo generar una clase 
     que genere una figura similar a una dona?
 """
-class Donut:
-    def __init__(self, position, material, major_radius, minor_radius):
-        self.position = position
-        self.material = material
+class Donut(Shape):
+    def __init__(self, position, material, major_radius, minor_radius, normal):
+        super().__init__(position, material)
         self.major_radius = major_radius
         self.minor_radius = minor_radius
+        self.normal = normalizar(normal)
 
     def ray_intersect(self, origin, direction):
         # Calcula la intersección con el plano central de la dona
-        central_plane = Plane(self.position, [0, 0, 1], self.material)
+        central_plane = Plane(self.position, self.normal, self.material)
         central_intercept = central_plane.ray_intersect(origin, direction)
 
         if central_intercept is None:
@@ -223,3 +223,110 @@ class Sphere(Shape):
                         normal=normal,
                         texcoords=(u, v),
                         obj=self)
+    """
+        Conversación con ChatGPT: ¿Con la clase Plano, como puedo crear una clase Triángulo y, después, una Pirámide?
+    """
+class Triangle(Shape):
+        def __init__(self, vertices, material):
+            super().__init__(pos=vertices[0], material=material)
+            self.vertices = vertices
+
+        def ray_intersect(self, origin, direction):
+            v0, v1, v2 = self.vertices
+
+            edge1 = restar_vectores(v1, v0)
+            edge2 = restar_vectores(v2, v0)
+            normal = normalizar(producto_cruz(edge1, edge2))
+
+            d = producto_punto(normal, v0)
+
+            den= producto_punto(normal, direction)
+            if abs(den) < 0.0001:
+                return None
+
+            t = (d - producto_punto(normal, origin)) / den
+            if t < 0:
+                return None
+
+            point = sumar_vectores(origin, multi_vector(direction,t))
+
+            edge0 = restar_vectores(v0, v2)
+            edge2 = restar_vectores(v2, v1)
+
+            if producto_punto(normal, producto_cruz(edge0, restar_vectores(point, v2))) < 0:
+                return None
+            
+            if producto_punto(normal, producto_cruz(edge1, restar_vectores(point, v0))) < 0:
+                return None
+            
+            if producto_punto(normal, producto_cruz(edge2, restar_vectores(point, v1))) < 0:
+                return None
+
+
+            c0 = producto_punto(edge0, restar_vectores(point, v2))
+            c1 = producto_punto(edge1, restar_vectores(point, v0))
+            c2 = producto_punto(edge2, restar_vectores(point, v1))
+            total = c0 + c1 + c2
+            u = c1 / total
+            v = c2 / total
+
+            u *= 1.8
+            v *= 1.3
+
+            return Intercept(distance=t,
+                            impact=point,
+                            normal=normal,
+                            texcoords=(u, 1-v),
+                            obj=self)
+
+
+class Pyramid(Shape):
+    def __init__(self, position, width, height, depth, rotation, material):
+        super().__init__(pos=position, material=material)
+        self.W = width
+        self.H = height
+        self.depth = depth
+        self.rot = rotation
+
+    def ray_intersect(self, origin, direction):
+        v0 = (-self.W / 2, 0, -self.depth / 2)
+        v1 = (-self.W / 2, 0, self.depth / 2)
+        v2 = (self.W / 2, 0, self.depth / 2)
+        v3 = (self.W / 2, 0, -self.depth / 2)
+
+        apex = (0, self.H, 0)
+
+        v0 = rotacion_vector(v0, self.rot)
+        v1 = rotacion_vector(v1, self.rot)
+        v2 = rotacion_vector(v2, self.rot)
+        v3 = rotacion_vector(v3, self.rot)
+        apex = rotacion_vector(apex, self.rot)
+
+        v0 = sumar_vectores(v0, self.position)
+        v1 = sumar_vectores(v1, self.position)
+        v2 = sumar_vectores(v2, self.position)
+        v3 = sumar_vectores(v3, self.position)
+        apex = sumar_vectores(apex, self.position)
+
+        triangles = []
+        triangles.append(Triangle((v0, v1, v2), self.material))
+        triangles.append(Triangle((v0, v2, v3), self.material))
+        triangles.append(Triangle((v0, v1, apex), self.material))
+        triangles.append(Triangle((v1, v2, apex), self.material))
+        triangles.append(Triangle((v2, v3, apex), self.material))
+        triangles.append(Triangle((v3, v0, apex), self.material))
+
+        nearIntercept = None
+        for triangle in triangles:
+            intercept = triangle.ray_intersect(origin, direction)
+            if intercept is not None:
+                if nearIntercept is None or intercept.distance < nearIntercept.distance:
+                    nearIntercept = intercept
+
+        if nearIntercept:
+            return Intercept(distance=nearIntercept.distance,
+                            impact=nearIntercept.impact,
+                            normal=nearIntercept.normal,
+                            texcoords=nearIntercept.texcoords,
+                            obj=self)
+        return None
